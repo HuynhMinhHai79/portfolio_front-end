@@ -143,7 +143,7 @@ const GitHubSearch = () => {
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-white text-center">No repositories found for "{query}".</p>
+                                <p className="text-white text-center">No repositories found for `{query}`.</p>
                             )}
                         </div>
                     )}
