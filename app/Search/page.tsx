@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import axios, { AxiosError } from "axios";
 import { FaSearch, FaGithub } from "react-icons/fa";
 
 const GitHubSearch = () => {
@@ -34,20 +34,22 @@ const GitHubSearch = () => {
       setLoading(true);
       setError("");
 
-      // Fetch user info
       const userResponse = await axios.get(`https://api.github.com/users/${username}`);
       setUserInfo(userResponse.data);
 
-      // Fetch user repositories
       const reposResponse = await axios.get(`https://api.github.com/users/${username}/repos`);
       setRepos(reposResponse.data);
       setFilteredRepos(reposResponse.data); // Initialize filteredRepos with all repos
-    } catch (err: any) {
-      setError(
-        `Failed to fetch data for "${username}". ${
-          err.response?.status === 404 ? "User not found." : err.message
-        }`
-      );
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(
+          `Failed to fetch data for "${username}". ${
+            err.response?.status === 404 ? "User not found." : err.message
+          }`
+        );
+      } else {
+        setError("An unexpected error occurred.");
+      }
       setUserInfo(null);
       setRepos([]);
       setFilteredRepos([]);
@@ -94,7 +96,7 @@ const GitHubSearch = () => {
             onClick={handleFetchUser}
             className="w-full py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
           >
-            <FaGithub />  Search
+            <FaGithub /> Search
           </button>
         </div>
 
