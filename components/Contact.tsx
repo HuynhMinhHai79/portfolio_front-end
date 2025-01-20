@@ -89,7 +89,7 @@ export const Contact = () => {
               
             >
             <Link 
-                href="/sendmessage" 
+                href="/Search" 
                 className="px-12 py-5 bg-blue-500 text-white rounded-full hover:bg-blue-600"
             >
                 Searching Now
