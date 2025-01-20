@@ -17,21 +17,21 @@ const GitHubSearch = () => {
         following: number;
         public_repos: number;
     }
-
+    
     interface Repository {
         id: number;
         name: string;
         description: string | null;
         html_url: string;
     }
-
-    const [query, setQuery] = useState<string>(""); // Keyword for search
+    
+    const [query, setQuery] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
-    const router = useRouter(); const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const router = useRouter();
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [repos, setRepos] = useState<Repository[]>([]);
     const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]);
     const [error, setError] = useState<string>("");
-
     useEffect(() => {
         const fetchUserInfoAndRepos = async () => {
             try {
@@ -40,9 +40,10 @@ const GitHubSearch = () => {
 
                 const reposResponse = await axios.get("https://api.github.com/users/HuynhMinhHai79/repos");
                 setRepos(reposResponse.data);
+                setFilteredRepos(reposResponse.data); // Initialize filteredRepos with all repos
             } catch (error) {
                 console.error(error);
-                setError("Failed to fetch data from GitHub.");
+                setError("Failed to fetch data from GitHub. " + (error instanceof Error ? error.message : String(error)));
             } finally {
                 setLoading(false);
             }
@@ -56,12 +57,11 @@ const GitHubSearch = () => {
     };
     // Handle search button click
     const handleSearchClick = () => {
-        const filtered = repos.filter((repo: any) =>
-            repo.name.toLowerCase().includes(query.toLowerCase()) || // Search in repository name
-            (repo.description && repo.description.toLowerCase().includes(query.toLowerCase())) // Search in description
+        const filtered = repos.filter((repo: Repository) =>
+            repo.name.toLowerCase().includes(query.toLowerCase()) ||
+            (repo.description && repo.description.toLowerCase().includes(query.toLowerCase()))
         );
-
-        setFilteredRepos(filtered); // Update the filtered repos state
+        setFilteredRepos(filtered);
     };
     // Back button handler
     const handleBackClick = () => {
@@ -101,7 +101,7 @@ const GitHubSearch = () => {
                                 />
                                 <div>
                                     <h2 className="text-2xl font-bold">{userInfo.name}</h2>
-                                    <p className="text-gray-300">{userInfo.bio || 'No bio available'}</p>
+                                    <p className="text-gray-300">{userInfo.bio || 'No bio available'}</p> 
                                     <p className="text-gray-300">Followers: {userInfo.followers}</p>
                                     <p className="text-gray-300">Following: {userInfo.following}</p>
                                     <p className="text-gray-300">Public Repos: {userInfo.public_repos}</p>
@@ -134,7 +134,7 @@ const GitHubSearch = () => {
                     {query && (
                         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredRepos.length > 0 ? (
-                                filteredRepos.map((repo: any) => (
+                                filteredRepos.map((repo: Repository) => (
                                     <div
                                         key={repo.id}
                                         className="bg-white/10 p-6 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
