@@ -1,10 +1,10 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import project1 from '@/assets/proj1.png'
-import project2 from '@/assets/proj2.png'
-import project3 from '@/assets/proj3.png'
-import { section } from 'framer-motion/client'
+import project1 from '/public/proj1.png';
+import project2 from '/public/proj2.png';
+import project3 from '/public/proj3.png';
+
 import { useMotionTemplate, useMotionValue, motion, animate } from 'framer-motion'
 
 

@@ -6,29 +6,42 @@ import { useRouter } from "next/navigation";
 import { FaSearch, FaGithub } from "react-icons/fa"; // Import cute icons from React Icons
 
 const GitHubSearch = () => {
-    const [query, setQuery] = useState(""); // Keyword for search
-    const [repos, setRepos] = useState([]); // All repositories fetched
-    const [userInfo, setUserInfo] = useState<any>(null); // User information
-    const [filteredRepos, setFilteredRepos] = useState([]); // Filtered repositories
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
 
-    const router = useRouter(); 
-    
-    // Fetch all repositories from GitHub
+
+
+    interface UserInfo {
+        avatar_url: string;
+        name: string;
+        bio: string | null;
+        followers: number;
+        following: number;
+        public_repos: number;
+    }
+
+    interface Repository {
+        id: number;
+        name: string;
+        description: string | null;
+        html_url: string;
+    }
+
+    const [query, setQuery] = useState<string>(""); // Keyword for search
+    const [loading, setLoading] = useState<boolean>(true);
+    const router = useRouter(); const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [repos, setRepos] = useState<Repository[]>([]);
+    const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]);
+    const [error, setError] = useState<string>("");
+
     useEffect(() => {
         const fetchUserInfoAndRepos = async () => {
             try {
-                // Fetch user info
                 const userResponse = await axios.get("https://api.github.com/users/HuynhMinhHai79");
-                setUserInfo(userResponse.data); // Store user info
+                setUserInfo(userResponse.data);
 
-                // Fetch repositories
-                const reposResponse = await axios.get(
-                    "https://api.github.com/users/HuynhMinhHai79/repos"
-                );
-                setRepos(reposResponse.data); // Store repos
-            } catch (err) {
+                const reposResponse = await axios.get("https://api.github.com/users/HuynhMinhHai79/repos");
+                setRepos(reposResponse.data);
+            } catch (error) {
+                console.error(error);
                 setError("Failed to fetch data from GitHub.");
             } finally {
                 setLoading(false);
@@ -37,12 +50,10 @@ const GitHubSearch = () => {
 
         fetchUserInfoAndRepos();
     }, []);
-
     // Handle search input change
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value); // Update the query state with the input value
     };
-
     // Handle search button click
     const handleSearchClick = () => {
         const filtered = repos.filter((repo: any) =>
@@ -52,7 +63,6 @@ const GitHubSearch = () => {
 
         setFilteredRepos(filtered); // Update the filtered repos state
     };
-
     // Back button handler
     const handleBackClick = () => {
         router.back(); // Navigate to the previous page
@@ -91,7 +101,7 @@ const GitHubSearch = () => {
                                 />
                                 <div>
                                     <h2 className="text-2xl font-bold">{userInfo.name}</h2>
-                                    <p className="text-gray-300">{userInfo.bio || "No bio available"}</p>
+                                    <p className="text-gray-300">{userInfo.bio || 'No bio available'}</p>
                                     <p className="text-gray-300">Followers: {userInfo.followers}</p>
                                     <p className="text-gray-300">Following: {userInfo.following}</p>
                                     <p className="text-gray-300">Public Repos: {userInfo.public_repos}</p>
