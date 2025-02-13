@@ -6,7 +6,7 @@ import { Portfolio } from "@/components/Portfolio"
 import { KeyMetrics } from "@/components/KeyMetrics";
 import { Services } from "@/components/Services";
 import { Contact } from "@/components/Contact";
-import pool from "@/ultils/db";
+
 
 
 
