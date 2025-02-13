@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FaSearch, FaGithub, FaArrowLeft } from "react-icons/fa";
-import { useRouter } from "next/navigation";  // Use this from next/navigation
+import { useRouter } from "next/navigation";
 
 const GitHubSearch = () => {
     interface UserInfo {
@@ -22,15 +22,16 @@ const GitHubSearch = () => {
         html_url: string;
     }
 
-    const [username, setUsername] = useState<string>(""); // Username state
-    const [query, setQuery] = useState<string>(""); // Search query state
-    const [loading, setLoading] = useState<boolean>(false); // Loading state
-    const [userInfo, setUserInfo] = useState<UserInfo | null>(null); // User info state
-    const [repos, setRepos] = useState<Repository[]>([]); // User repositories
-    const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]); // Filtered repositories
-    const [error, setError] = useState<string>(""); // Error state
+    const [message, setMessage] = useState<string>("");
+    const [username, setUsername] = useState<string>("");
+    const [query, setQuery] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [repos, setRepos] = useState<Repository[]>([]);
+    const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]);
+    const [error, setError] = useState<string>("");
 
-    const router = useRouter();  // Use this for navigation in App Router
+    const router = useRouter();
 
     const fetchUserInfoAndRepos = async (username: string) => {
         try {
@@ -42,12 +43,11 @@ const GitHubSearch = () => {
 
             const reposResponse = await axios.get(`https://api.github.com/users/${username}/repos`);
             setRepos(reposResponse.data);
-            setFilteredRepos(reposResponse.data); // Initialize filteredRepos with all repos
+            setFilteredRepos(reposResponse.data);
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 setError(
-                    `Failed to fetch data for "${username}". ${err.response?.status === 404 ? "User not found." : err.message
-                    }`
+                    `Failed to fetch data for "${username}". ${err.response?.status === 404 ? "User not found." : err.message}`
                 );
             } else {
                 setError("An unexpected error occurred.");
@@ -61,7 +61,7 @@ const GitHubSearch = () => {
     };
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value); // Update query state
+        setQuery(e.target.value);
     };
 
     const handleSearchClick = () => {
@@ -78,12 +78,41 @@ const GitHubSearch = () => {
         }
     };
 
+    // ✅ Gửi message đến API
+    const handleSendMessage = async () => {
+        if (!message.trim()) {
+            alert("Message cannot be empty!");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/saveMessage", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ message }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Message sent successfully!");
+                setMessage(""); // Xóa message sau khi gửi
+            } else {
+                alert(`Failed to send message: ${data.error}`);
+            }
+        } catch (error) {
+            alert("An error occurred while sending the message.");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-r from-red-400 to-indigo-600 text-white py-12">
             <div className="container mx-auto px-4">
                 {/* Back Button */}
                 <button
-                    onClick={() => router.back()} // Use router.back() for going back
+                    onClick={() => router.back()}
                     className="mb-6 px-6 py-2 bg-white/20 rounded-xl hover:bg-white/30 transition duration-300 flex items-center gap-2"
                 >
                     <FaArrowLeft /> Back
@@ -93,25 +122,22 @@ const GitHubSearch = () => {
 
                 {/* Input for Username */}
                 <div className="max-w-lg mx-auto bg-white/10 p-8 rounded-xl shadow-lg mb-8">
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Enter GitHub username..."
-                            className="w-full p-4 rounded-xl bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-                        />
-                    </div>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter GitHub username..."
+                        className="w-full p-4 rounded-xl bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                    />
                     <button
                         onClick={handleFetchUser}
-                        className="w-full py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                        className="w-full mt-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
                     >
                         <FaGithub /> Search
                     </button>
                 </div>
 
                 {loading && <div className="text-center">Loading...</div>}
-
                 {error && <div className="text-red-500 text-center mt-4">{error}</div>}
 
                 {/* Display User Info */}
@@ -134,21 +160,35 @@ const GitHubSearch = () => {
                     </div>
                 )}
 
+                {/* Input for Message */}
+                <div className="max-w-lg mx-auto bg-white/10 p-8 rounded-xl shadow-lg mb-8">
+                    <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Enter your message..."
+                        className="w-full p-4 rounded-xl bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                    />
+                    <button
+                        onClick={handleSendMessage}
+                        className="w-full mt-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                    >
+                        Send Message
+                    </button>
+                </div>
+
                 {/* Search Repositories */}
                 {userInfo && (
                     <div className="max-w-lg mx-auto bg-white/10 p-8 rounded-xl shadow-lg">
-                        <div className="mb-6">
-                            <input
-                                type="text"
-                                value={query}
-                                onChange={handleSearch}
-                                placeholder="Search repositories..."
-                                className="w-full p-4 rounded-xl bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-                            />
-                        </div>
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={handleSearch}
+                            placeholder="Search repositories..."
+                            className="w-full p-4 rounded-xl bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                        />
                         <button
                             onClick={handleSearchClick}
-                            className="w-full py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                            className="w-full mt-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
                         >
                             <FaSearch /> Search Repositories
                         </button>
@@ -165,21 +205,14 @@ const GitHubSearch = () => {
                             >
                                 <h2 className="text-xl font-bold">{repo.name}</h2>
                                 <p className="text-gray-300 mt-2">{repo.description || "No description available"}</p>
-                                <a
-                                    href={repo.html_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-400 hover:underline mt-4 block"
-                                >
+                                <a href={repo.html_url} target="_blank" className="text-blue-400 hover:underline mt-4 block">
                                     <FaGithub className="inline-block mr-2" />
                                     View Repository
                                 </a>
                             </div>
                         ))}
                     </div>
-                ) : (
-                    userInfo && <p className="text-white text-center mt-8">No repositories found for `{query}`.</p>
-                )}
+                ) : userInfo && <p className="text-white text-center mt-8">No repositories found for `{query}`.</p>}
             </div>
         </div>
     );
